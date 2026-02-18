@@ -17,7 +17,7 @@ Toutes ces fonctionnalités sont à programmer en JavaScript côté client.
 	dans les prochaines heures
 
 2) Séparément, intégrez les informations correspondant aux prochains jours :
-	• Indiquer si, globalement, le temps est à l’amélioration ou à la détérioration dans les
+• Indiquer si, globalement, le temps est à l’amélioration ou à la détérioration dans les
 		prochains jours
 
 	• Permettre à l’utilisateur de regarder le détail heure par heure des prochains jours.
