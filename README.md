@@ -5,6 +5,7 @@ https://api.open-meteo.com/v1/forecast.
 Bien que la forme de votre page soit libre, elle devra remplir un certain nombre de fonctionnalités.
 Toutes ces fonctionnalités sont à programmer en JavaScript côté client.
 1) Dans un premier temps, les fonctionnalités suivantes vous sont demandées :
+
 	• Afficher sur la page, la météo actuelle de Blois. Afficher également la météo globale de la
 		journée (minimums/maximums, etc.) Fait ✓
 
@@ -20,7 +21,7 @@ Toutes ces fonctionnalités sont à programmer en JavaScript côté client.
 
 	• Permettre à l’utilisateur de regarder le détail heure par heure des prochains jours.
 
-4) Vis à vis des localisations :
+3) Vis à vis des localisations :
 	• Permettre à l’utilisateur d’afficher la météo actuelle, journalière et future d’un endroit précis
 		(utilisez les coordonnées latitude/longitude)
 	• Permettre à l’utilisateur d’afficher les informations correspondantes à plusieurs localisations
@@ -29,7 +30,7 @@ Toutes ces fonctionnalités sont à programmer en JavaScript côté client.
 		la proposer facilement à l’utilisateur lors d’un prochain passage sur la page.
 	• Permettre à l’utilisateur de rechercher une localisation grâce à son nom. Pour cela, vous
 		pouvez utiliser l’API https://nominatim.openstreetmap.org.
-5) Malheureusement, Météo France ne supporte pas l’utilisation de bounding box directement.
+4) Malheureusement, Météo France ne supporte pas l’utilisation de bounding box directement.
 Développez des fonctionnalités permettant de remplacer cet outil :
 	• Permettre à l’utilisateur d’indiquer une boîte (longitude min, longitude max, latitude min,
 		latitude max), et filtrer les localisations pré-enregistrées par l’utilisateur pour ne garder que
