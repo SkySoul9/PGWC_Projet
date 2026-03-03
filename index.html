@@ -4,17 +4,44 @@
     <head>
         <link rel="stylesheet" href="style.css">
         <script defer src="script.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <title>Projet</title>
     </head>
     <body>
         <div> 
             <h1> La Météo à Blois </h1>
+            <input type="checkbox" id="cbTempMax" name="temp" value="pTempMax" />
+            <label for="cbTempMax">Température Max </label>
+        
+            <input type="checkbox" id="cbTempMin" name="temp" value = "pTempMin"  />
+            <label for="cbTempMin">Température Minimum </label>
+
+            <input type="checkbox" id="cbTempActuel" name="temp" value="tempActuel" />
+            <label for="cbTempActuel">Température Actuel </label>
             
-        
-        
-        
-        
-        
+        </div>
+
+        <div>
+            <label for="choixHeure">Choisissez l'heure a laquel vous voulez savoir la température</label>
+            <input type="text" placeholder="Entrez une valeur ici" id="choixHeure" />
+            <p></p>
+            <button type="button" onclick="getHeure();">Afficher</button>
+        </div>
+        <div width="60%">
+            <h1>Affichage courbe température future journée </h1>
+
+            <canvas id="tempFuture" ></canvas>
+        </div>
+        <div> 
+            <h1>Météo a un endroit précis d'apres météo France</h1>
+            <label for="latitude"> Latitude : </label>
+            <input type="text" placeholder="Exemple : 77.01" id="latitude"/>
+            <label for="longitude"> Longitude : </label>
+            <input type="text" placeholder="Exemple : 13.69" id="longitude"/>
+            <label for="place" > Nom de la localisation</label>
+            <input type="text" placeholder="Exemple : Blois" id="place"/>
+            <button type = "button" onclick="getMeteoActuel();">Meteo Actuel</button>
+            <button type="button" onclick="getLieu();"> Liste des lieux ajouté </button>
         </div>
     </body>
 </html>
