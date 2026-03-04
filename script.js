@@ -37,8 +37,8 @@ newDiv.appendChild(pTempMax);
 
 //Température a l'heure actuel
 
-date = new Date;
-heure = date.getHours();//récupere l'heure du PC pour l'utiliser pour tempActuel
+let date = new Date;
+let heure = date.getHours();//récupere l'heure du PC pour l'utiliser pour tempActuel
 
 const tempActuel = document.createElement('p');
 tempActuel.textContent = "Temperature Actuel : " + rep.hourly.temperature_2m[heure] + rep.hourly_units.temperature_2m;
@@ -48,6 +48,8 @@ newDiv.appendChild(tempActuel);
 
 //gestion affichage temperature max/min/actuel exo1
 var checkTempMax = document.querySelector("input[id=cbTempMax]");
+var checkTempMin = document.querySelector("input[id=cbTempMin]");
+var checkTempActuel = document.querySelector("input[id=cbTempActuel]");
 
 checkTempMax.addEventListener('change', function() {
   if (this.checked) {
@@ -57,8 +59,6 @@ checkTempMax.addEventListener('change', function() {
   }
 });
 
-var checkTempMin = document.querySelector("input[id=cbTempMin]");
-
 checkTempMin.addEventListener('change', function() {
   if (this.checked) {
     pTempMin.hidden = false;
@@ -66,8 +66,6 @@ checkTempMin.addEventListener('change', function() {
     pTempMin.hidden = true;
   }
 });
-
-var checkTempActuel = document.querySelector("input[id=cbTempActuel]");
 
 checkTempActuel.addEventListener('change', function() {
   if (this.checked) {
@@ -84,7 +82,7 @@ const pTempHeure = document.createElement('p');
  
 function getHeure(){
   var cHeure = document.getElementById("choixHeure").value;
-  if(cHeure > heure){ //vérification que l'heure demandé par l'utilisateur est une heure future
+  if(cHeure > heure && heure < 24){ //vérification que l'heure demandé par l'utilisateur est une heure future
     pTempHeure.textContent = rep.hourly.temperature_2m[cHeure];
     newDiv.appendChild(pTempHeure);
   }else {
@@ -92,8 +90,7 @@ function getHeure(){
   }
 }
 const courbeTemp = document.getElementById('tempFuture');
-courbeTemp.height = 1;
-courbeTemp.width = 3; // ratio de taille 1/3
+// marche pas
 
 new Chart(courbeTemp, {// sert a afficher un graphique avec les température de la journée
   type: 'line', 
@@ -153,21 +150,21 @@ function validNumber(nombre){ // verifie si un string est un nombre
 
 function getMeteoActuel(){ //fonction qui affiche la meteoActuel(daily)
 
-  let longitude = document.getElementById("longitude").value;
-  let latitude = document.getElementById("latitude").value;
-  let lieu = document.getElementById("place").value;
+  var longitude = document.getElementById("longitude").value;
+  var latitude = document.getElementById("latitude").value;
+  var lieu = document.getElementById("place").value;
   console.log(longitude);
   console.log(latitude);
 
   if(notEmpty(longitude) && notEmpty(latitude) && validNumber(latitude) && validNumber(longitude)){ //vérifie que ca va pas faire planter l'appel api
     repMP = response("https://api.open-meteo.com/v1/forecast?latitude="+latitude+"&longitude="+longitude+"&daily=weather_code,rain_sum,snowfall_sum,precipitation_sum,wind_speed_10m_max&hourly=temperature_2m,cloud_cover,rain,snowfall&models=meteofrance_seamless&current=temperature_2m,rain,snowfall,precipitation,cloud_cover,wind_speed_10m");
 
-    let dRain = repMP.current.rain;
-    let dNeige = repMP.current.snowfall;
-    let dPrecipitation = repMP.current.precipitation;
-    let dTemperature = repMP.current.temperature_2m;
-    meteoDaily.textContent = "Voici la météo du jour en " + longitude +" , " +latitude;
-    temperatureDaily.textContent="Il fait "+ dTemperature+"°C aujourd'hui.";
+    var dRain = repMP.current.rain;
+    var dNeige = repMP.current.snowfall;
+    var dPrecipitation = repMP.current.precipitation;
+    var dTemperature = repMP.current.temperature_2m;
+    meteoDaily.textContent = "Voici la météo du jour en " + longitude + " , " + latitude;
+    temperatureDaily.textContent="Il fait "+ dTemperature + "°C aujourd'hui.";
     if(dRain>0){
       pluieDaily.textContent = "Il pleut aujourd'hui " + dRain +" mm.";
     }
@@ -186,8 +183,8 @@ function getMeteoActuel(){ //fonction qui affiche la meteoActuel(daily)
 
     if(notEmpty(lieu)){
       lieux.push(document.getElementById("place").value);
-      coordX.push(Number(longitude));
-      coordY.push(Number(latitude));
+      coordX.push(Number(latitude));
+      coordY.push(Number(longitude));
       lieuAjouté.textContent = "Nouveau lieu ajouté "+ lieu  +", " +"Longitude : "+ longitude +" Latitude : "+  latitude;
       divTab[3].appendChild(lieuAjouté);
     }
@@ -201,7 +198,7 @@ function getMeteoActuel(){ //fonction qui affiche la meteoActuel(daily)
 
 //afficher la liste des lieu via un boutton 
 function getLieu(){
-  for (let i=0;i < lieux.length ; i++){
+  for (let i = 0; i < lieux.length; i++){
     list_lieux.textContent = "Votre liste de lieux " + lieux;
   }
   divTab[3].appendChild(list_lieux);
@@ -222,3 +219,6 @@ function getLieu(){
 
 //api link température a 4j
 // https://api.open-meteo.com/v1/forecast?latitude=47.5943&longitude=1.3291&daily=temperature_2m_max,temperature_2m_min&hourly=temperature_2m,is_day&models=best_match&timezone=auto
+
+
+// REGLER LE PROBLEME AVEC 
