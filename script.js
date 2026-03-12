@@ -1,6 +1,9 @@
 //questions : es-ce qu'il faut afficher pour la journée les heures futures genre toute la journée ca passe ou précisement le temps apres l'heure actuel et la temperature seule suffit ?
 //es-ce que c'est important de gerer avec un dico ou non le stockage des lieux ou si on utilise des tableaux ca passe 
 // boucle pour cacher les elements, comment faire 
+
+// Conteneur ajouté dynamiquement pour les résultats principaux du projet
+// (utilisé pour les informations globales de Blois et les infos horaires).
 const newDiv = document.createElement('div');
 document.body.appendChild(newDiv);
 
@@ -9,7 +12,9 @@ newTitle.textContent = "Météo test1";
 newDiv.appendChild(newTitle);
 
 
-//fonction appelle a l'api
+// fonction appelle a l'api
+// param query : URL de requête Open-Meteo ou Nominatim
+// renvoie l'objet JSON parsé (synchrone pour simplicité, mais en production préférer fetch/async)
 function response(query){
     const xhr = new XMLHttpRequest();
     xhr.open("GET", query, false); 
@@ -19,7 +24,7 @@ function response(query){
     return response;
 }
 
-//température link a 1j
+// temperature link a 1j (donnée de base pour affichage initial de Blois)
 rep = response("https://api.open-meteo.com/v1/forecast?latitude=47.5943&longitude=1.3291&daily=temperature_2m_max,temperature_2m_min&hourly=temperature_2m,weather_code,relative_humidity_2m,apparent_temperature,is_day&models=best_match&timezone=auto&forecast_days=1");
 
 //température Min de la jouréne 
@@ -123,6 +128,9 @@ const temperatureDaily = document.createElement('p');
 const lieuAjouté = document.createElement('p');
 const list_lieux = document.createElement('p');
 //jsp comment faire avec un dictionnaire, pour l'instant j'utilise 3 tableaux, 1 lieux, 1 coordX, 1 coordY, chaque indice = 1 lieu  indice 0 de chaque tableau = lieu[0] coordX[0] etc
+// tableaux pour conserver les lieux utilisés / compatibilité avec le code existant.
+// lieux : noms des endroits
+// coordX = longitude, coordY = latitude
 const lieux = [];
 const coordX = []; //longitude
 const coordY = []; //latitude
@@ -181,37 +189,265 @@ function getMeteoActuel(){ //fonction qui affiche la meteoActuel(daily)
     divTab[3].appendChild(neigeDaily);
     divTab[3].appendChild(pluieDaily);
 
-    if(notEmpty(lieu)){
-      lieux.push(document.getElementById("place").value);
-      coordX.push(Number(latitude));
-      coordY.push(Number(longitude));
+    if(notEmpty(lieu))
+    {
+      addSavedLocation(lieu, Number(latitude), Number(longitude));
       lieuAjouté.textContent = "Nouveau lieu ajouté "+ lieu  +", " +"Longitude : "+ longitude +" Latitude : "+  latitude;
       divTab[3].appendChild(lieuAjouté);
     }
 
-  }else{
+  }
+  else
+  {
     meteoDaily.textContent ="Les coodonnées indiqués ne fonctionne pas.";
     divTab[3].appendChild(meteoDaily);
   }
 
 }
 
-//afficher la liste des lieu via un boutton 
-function getLieu(){
-  for (let i = 0; i < lieux.length; i++){
-    list_lieux.textContent = "Votre liste de lieux " + lieux;
+// afficher la liste des lieu via un boutton
+
+// liason à la liste sauvegardée
+function getLieu(){renderSavedLocationList();}
+
+// liste des lieux stockée dans localStorage (avec nom, latitude et longitude)
+let savedLocations = [];
+
+function loadSavedLocations()
+{
+  // s'exécute au démarrage gardant les données existantes.
+
+  const saved = localStorage.getItem('savedLocations');
+  if(saved)
+  {
+    try {
+      savedLocations = JSON.parse(saved);
+      if(!Array.isArray(savedLocations)) savedLocations = [];
+    } 
+    catch(e) {savedLocations = [];}
   }
-  divTab[3].appendChild(list_lieux);
-  console.log("lieux : "+ lieux);
+
+  // on remplit aussi les tableaux existants pour compatibilité (liste des villes avec son info)
+  savedLocations.forEach(loc => {
+    if(!lieux.includes(loc.name)) 
+    {
+      lieux.push(loc.name);
+      coordY.push(Number(loc.latitude));
+      coordX.push(Number(loc.longitude));
+    }
+  });
+
+  renderSavedLocationList();
 }
 
+// pour stocker les "locations" dans le localStorage
+function saveSavedLocations() {localStorage.setItem('savedLocations', JSON.stringify(savedLocations));}
 
+function renderSavedLocationList()
+{
+  const list = document.getElementById('savedLocationsList');
+  if(!list) return; // si vide alors drop
+  list.innerHTML = '';
+  if(savedLocations.length === 0)
+  {
+    list.innerHTML = '<li>(Aucun lieu enregistré)</li>';
+    return;
+  }
 
+  savedLocations.forEach((loc, index) => {
+    const li = document.createElement('li');
+    li.textContent = `${loc.name} (lat ${loc.latitude}, lon ${loc.longitude}) `;
 
+    const btn = document.createElement('button');
+    btn.textContent = 'Afficher météo';
+    btn.addEventListener('click', () => {
+      getWeatherForLocation(loc.latitude, loc.longitude, loc.name);
+    });
+    const btnRemove = document.createElement('button');
+    btnRemove.textContent = 'Supprimer';
+    btnRemove.addEventListener('click', () => {
+      savedLocations.splice(index, 1);
+      const pos = lieux.indexOf(loc.name);
+      if(pos !== -1){ lieux.splice(pos,1); coordY.splice(pos,1); coordX.splice(pos,1); }
+      saveSavedLocations();
+      renderSavedLocationList();
+    });
 
-//Ajouter la meme chose pour l'heure actuel 
-//ajouter la meme chose pour le jour futur grace a une variable entre 1 et 4 on accede a quel jour futur on veut savoir
-//le tout relié a 2 différent bouton
+    li.appendChild(btn);
+    li.appendChild(btnRemove);
+    list.appendChild(li);
+  });
+}
+
+function addSavedLocation(name, latitude, longitude)
+{
+  if(!name || !validNumber(latitude) || !validNumber(longitude)) return;
+  const exists = savedLocations.some(loc => loc.name === name && Number(loc.latitude) === Number(latitude) && Number(loc.longitude) === Number(longitude));
+  if(!exists)
+  {
+    savedLocations.push({name, latitude: Number(latitude), longitude: Number(longitude)});
+    saveSavedLocations();
+    if(!lieux.includes(name)){
+      lieux.push(name);
+      coordY.push(Number(latitude));
+      coordX.push(Number(longitude));
+    }
+    renderSavedLocationList();
+  }
+}
+
+function clearWeatherResults()
+{
+  const div = document.getElementById('savedLocationWeather');
+  if(div) div.innerHTML = '';
+}
+
+function getWeatherForLocation(latitude, longitude, name)
+{
+  const target = document.getElementById('savedLocationWeather');
+  if(!target) return;
+
+  let row = document.createElement('div');
+  row.style.border = '1px solid #ccc';
+  row.style.padding = '7px';
+  row.style.marginBottom = '6px';
+
+  try
+  {
+    const repL = response(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m&current_weather=true&timezone=auto&forecast_days=1`);
+
+    let current = repL.current_weather?.temperature ?? 'Inconnu';
+    let sup = repL.daily?.temperature_2m_min?.[0] ?? '-';
+    let smax = repL.daily?.temperature_2m_max?.[0] ?? '-';
+
+    row.innerHTML = `<strong>Météo pour ${name} (lat ${latitude}, lon ${longitude})</strong><br>Actuel: ${current} °C<br>Min: ${sup} °C, Max: ${smax} °C`;
+
+    const hIndex = new Date().getHours();
+    const valNext = repL.hourly?.temperature_2m?.slice(hIndex, hIndex+4) || [];
+    row.innerHTML += `<br>Heures suivantes: ${valNext.join(' / ')} °C`;
+
+    target.appendChild(row);
+  }
+  catch(err)
+  {
+    row.textContent = `Erreur météo pour ${name} : ${err}`;
+    target.appendChild(row);
+  }
+}
+
+function displayWeatherForAllSaved(){
+  clearWeatherResults();
+  if(savedLocations.length === 0){
+    const target = document.getElementById('savedLocationWeather');
+    if(target) target.textContent = 'Aucun lieu enregistré';
+    return;
+  }
+  savedLocations.forEach(loc => getWeatherForLocation(loc.latitude, loc.longitude, loc.name));
+}
+
+// Recherche un lieu avec Nominatim et affiche sa météo, puis l'ajoute dans les lieux enregistrés
+function searchLocationByName()
+{
+  const name = document.getElementById('locationName').value;
+  if(!notEmpty(name))
+  {
+    alert('Entrez un nom de lieu pour rechercher.');
+    return;
+  }
+
+  try
+  {
+    const result = response(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(name)}`);
+    if(!result || result.length === 0)
+    {
+      alert('Aucun lieu trouvé.');
+      return;
+    }
+    const item = result[0];
+    const lat = Number(item.lat);
+    const lon = Number(item.lon);
+    const displayName = item.display_name || name;
+    document.getElementById('latitude').value = lat;
+    document.getElementById('longitude').value = lon;
+    document.getElementById('place').value = displayName;
+    addSavedLocation(displayName, lat, lon);
+    getWeatherForLocation(lat, lon, displayName);
+  }
+  catch(err){alert('Erreur appel Nominatim : ' + err);}
+}
+
+function filterLocationsByBBox() // la partie la plus chiante (bonus)
+{
+  const minLat = Number(document.getElementById('minLatitude').value);
+  const maxLat = Number(document.getElementById('maxLatitude').value);
+  const minLon = Number(document.getElementById('minLongitude').value);
+  const maxLon = Number(document.getElementById('maxLongitude').value);
+
+  if(!validNumber(minLat) || !validNumber(maxLat) || !validNumber(minLon) || !validNumber(maxLon))
+  {
+    alert('Veuillez renseigner des nombres valides pour la bounding box.');
+    return;
+  }
+  if(minLat>maxLat || minLon>maxLon)
+  {
+    alert('Latitude ou longitude min doit être inférieur ou égal à max.');
+    return;
+  }
+
+  const venues = savedLocations.filter(loc => loc.latitude >= minLat && loc.latitude <= maxLat && loc.longitude >= minLon && loc.longitude <= maxLon);
+  clearWeatherResults();
+  if(venues.length === 0)
+  {
+    document.getElementById('savedLocationWeather').textContent = 'Aucun lieu enregistré dans cette box.';
+    return;
+  }
+  venues.forEach(loc => getWeatherForLocation(loc.latitude, loc.longitude, loc.name));
+}
+
+function filterLocationsByRegion()
+{
+  const region = document.getElementById('regionName').value;
+  if(!notEmpty(region))
+  {
+    alert('Entrez une région ou département.');
+    return;
+  }
+
+  try
+  {
+    const result = response(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(region)}&countrycodes=fr`);
+    if(!result || result.length === 0)
+    {
+      alert('Région non trouvée.');
+      return;
+    }
+
+    const bbox = result[0].boundingbox;
+    if(!bbox || bbox.length !== 4)
+    {
+      alert('Impossible de récupérer le bbox pour cette région.');
+      return;
+    }
+
+    const minLat = Number(bbox[0]);
+    const maxLat = Number(bbox[1]);
+    const minLon = Number(bbox[2]);
+    const maxLon = Number(bbox[3]);
+
+    const venues = savedLocations.filter(loc => loc.latitude >= minLat && loc.latitude <= maxLat && loc.longitude >= minLon && loc.longitude <= maxLon);
+    clearWeatherResults();
+    if(venues.length === 0)
+    {
+      document.getElementById('savedLocationWeather').textContent = 'Aucun lieu enregistré dans cette région.';
+      return;
+    }
+    venues.forEach(loc => getWeatherForLocation(loc.latitude, loc.longitude, loc.name));
+  }
+  catch(err){alert('Erreur Nominatim région : ' + err);}
+}
+
+// Charger les lieux enregistrés au démarrage du site
+loadSavedLocations();
 
 //api link localisation exacte longitude latitude
 // https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=weather_code,rain_sum,snowfall_sum,precipitation_sum,wind_speed_10m_max&hourly=temperature_2m,cloud_cover,rain,snowfall&models=meteofrance_seamless&current=temperature_2m,rain,snowfall,precipitation,cloud_cover,wind_speed_10mhttps://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=weather_code,rain_sum,snowfall_sum,precipitation_sum,wind_speed_10m_max&hourly=temperature_2m,cloud_cover,rain,snowfall&models=meteofrance_seamless&current=temperature_2m,rain,snowfall,precipitation,cloud_cover,wind_speed_10m
@@ -219,6 +455,3 @@ function getLieu(){
 
 //api link température a 4j
 // https://api.open-meteo.com/v1/forecast?latitude=47.5943&longitude=1.3291&daily=temperature_2m_max,temperature_2m_min&hourly=temperature_2m,is_day&models=best_match&timezone=auto
-
-
-// REGLER LE PROBLEME AVEC 

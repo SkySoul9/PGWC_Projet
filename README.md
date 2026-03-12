@@ -24,26 +24,26 @@ Toutes ces fonctionnalités sont à programmer en JavaScript côté client.
 
 3) Vis à vis des localisations :
 	• Permettre à l’utilisateur d’afficher la météo actuelle, journalière et future d’un endroit précis
-		(utilisez les coordonnées latitude/longitude)
+		(utilisez les coordonnées latitude/longitude) ✓
 	• Permettre à l’utilisateur d’afficher les informations correspondantes à plusieurs localisations
-		en même temps
+		en même temps ✓
 	• Permettre à l’utilisateur d’enregistrer une localisation, et la stocker localement, pour pouvoir
-		la proposer facilement à l’utilisateur lors d’un prochain passage sur la page.
+		la proposer facilement à l’utilisateur lors d’un prochain passage sur la page. ✓
 	• Permettre à l’utilisateur de rechercher une localisation grâce à son nom. Pour cela, vous
-		pouvez utiliser l’API https://nominatim.openstreetmap.org.
+		pouvez utiliser l’API https://nominatim.openstreetmap.org. ✓
 4) Malheureusement, Météo France ne supporte pas l’utilisation de bounding box directement.
 Développez des fonctionnalités permettant de remplacer cet outil :
 	• Permettre à l’utilisateur d’indiquer une boîte (longitude min, longitude max, latitude min,
 		latitude max), et filtrer les localisations pré-enregistrées par l’utilisateur pour ne garder que
 		celles comprises dans cette boîte et afficher leur météo. Utilisez les vérifications de champ
-		de formulaires côté client pour vérifier les champs.
+		de formulaires côté client pour vérifier les champs. ✓
 	• Permettre à l’utilisateur de rechercher un département ou une région, et de la même façon,
-		filtrer les localisations pré-enregistrées par l’utilisateur pour afficher leur météo.
+		filtrer les localisations pré-enregistrées par l’utilisateur pour afficher leur météo. ✓
 	• (Bonus : plus difficile) Enfin, à partir d’une région ou d’une bounding box fournie par
 		l’utilisateur, retrouver les villes comprises dans cette région, et permettre à l’utilisateur
 		d’afficher leur météo et/ou de les ajouter à la liste des localisations enregistrées.
 		L’aspect visuel de vos pages sera peu considéré lors de l’évaluation. Il est préférable d’avoir des
-		implémentations fonctionnelles mais peu élégantes que des implémentations jolies et
+		implémentations fonctionnelles mais peu élégantes que des implémentations jolies et ✓
 		dysfonctionnelles ou inefficaces.
 
 

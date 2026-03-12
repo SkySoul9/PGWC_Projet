@@ -43,5 +43,36 @@
             <button type = "button" onclick="getMeteoActuel();">Meteo Actuel</button>
             <button type="button" onclick="getLieu();"> Liste des lieux ajouté </button>
         </div>
+
+        <div>
+            <h1>Recherche par nom de lieu</h1>
+            <label for="locationName">Nom : </label>
+            <input type="text" placeholder="Exemple : Blois" id="locationName" />
+            <button type="button" onclick="searchLocationByName();">Rechercher</button>
+            <button type="button" onclick="displayWeatherForAllSaved();">Afficher météo de tous les lieux enregistrés</button>
+        </div>
+
+        <div>
+            <h1>Filtrer par Box / Région</h1>
+            <label for="minLatitude">Lat min :</label>
+            <input type="text" id="minLatitude" placeholder="47.0" />
+            <label for="maxLatitude">Lat max :</label>
+            <input type="text" id="maxLatitude" placeholder="48.0" />
+            <label for="minLongitude">Lon min :</label>
+            <input type="text" id="minLongitude" placeholder="0.5" />
+            <label for="maxLongitude">Lon max :</label>
+            <input type="text" id="maxLongitude" placeholder="2.0" />
+            <button type="button" onclick="filterLocationsByBBox();">Filtrer par bounding box</button>
+            <p></p>
+            <label for="regionName">Département / Région :</label>
+            <input type="text" id="regionName" placeholder="Centre-Val de Loire" />
+            <button type="button" onclick="filterLocationsByRegion();">Filtrer par région</button>
+        </div>
+
+        <div>
+            <h1>Lieux enregistrés</h1>
+            <ul id="savedLocationsList"></ul>
+            <div id="savedLocationWeather"></div>
+        </div>
     </body>
 </html>
