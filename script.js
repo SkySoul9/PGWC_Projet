@@ -1,21 +1,10 @@
-//questions : es-ce qu'il faut afficher pour la journée les heures futures genre toute la journée ca passe ou précisement le temps apres l'heure actuel et la temperature seule suffit ?
-//es-ce que c'est important de gerer avec un dico ou non le stockage des lieux ou si on utilise des tableaux ca passe 
-// boucle pour cacher les elements, comment faire 
-
-// Conteneur ajouté dynamiquement pour les résultats principaux du projet
-// (utilisé pour les informations globales de Blois et les infos horaires).
 const newDiv = document.createElement('div');
 //document.body.appendChild(newDiv);
-
-const newTitle = document.createElement('h1');
-newTitle.textContent = "Températures";
-//newDiv.appendChild(newTitle);
-document.querySelectorAll("div")[0].appendChild(newTitle);
 
 
 // fonction appelle a l'api
 // param query : URL de requête Open-Meteo ou Nominatim
-// renvoie l'objet JSON parsé (synchrone pour simplicité, mais en production préférer fetch/async)
+// renvoie l'objet JSON parsé 
 function response(query){
     const xhr = new XMLHttpRequest();
     xhr.open("GET", query, false); 
@@ -28,81 +17,59 @@ function response(query){
 // temperature link a 1j (donnée de base pour affichage initial de Blois)
 rep = response("https://api.open-meteo.com/v1/forecast?latitude=47.5943&longitude=1.3291&daily=temperature_2m_max,temperature_2m_min&hourly=temperature_2m,weather_code,relative_humidity_2m,apparent_temperature,is_day&models=best_match&timezone=auto&forecast_days=1");
 
+
+var divTab = document.querySelectorAll("div");
 //température Min de la jouréne 
 const pTempMin = document.createElement('p');
 pTempMin.textContent = "Température Min journée à Blois : " + rep.daily.temperature_2m_min + rep.daily_units.temperature_2m_min;
+pTempMin.id= "temperature";
 pTempMin.hidden = true;
-//newDiv.appendChild(pTempMin);
+
 document.querySelectorAll("div")[0].appendChild(pTempMin);
 
 //Température Max de la journée 
 const pTempMax = document.createElement('p');
 pTempMax.textContent = "Temperature Max journée à Blois : " + rep.daily.temperature_2m_max + rep.daily_units.temperature_2m_max;
+pTempMax.id= "temperature";
 pTempMax.hidden = true;
-//newDiv.appendChild(pTempMax);
 document.querySelectorAll("div")[0].appendChild(pTempMax);
 
-
 //Température a l'heure actuel
-
 let date = new Date;
 let heure = date.getHours();//récupere l'heure du PC pour l'utiliser pour tempActuel
-
 const tempActuel = document.createElement('p');
 tempActuel.textContent = "Temperature Actuel : " + rep.hourly.temperature_2m[heure] + rep.hourly_units.temperature_2m;
+tempActuel.id= "temperature";
 tempActuel.hidden = true;
-//newDiv.appendChild(tempActuel);
 document.querySelectorAll("div")[0].appendChild(tempActuel);
 
 //gestion affichage temperature max/min/actuel exo1
-var checkTempMax = document.querySelector("input[id=cbTempMax]");
-var checkTempMin = document.querySelector("input[id=cbTempMin]");
-var checkTempActuel = document.querySelector("input[id=cbTempActuel]");
-
-checkTempMax.addEventListener('change', function() {
-  if (this.checked) {
-    pTempMax.hidden = false;
+function coche(x) {
+  cblist = document.querySelectorAll("p[id=temperature]");
+  if(cblist[x].hidden){
+    cblist[x].hidden = false;
   } else {
-    pTempMax.hidden = true;
+    cblist[x].hidden = true
   }
-});
-
-checkTempMin.addEventListener('change', function() {
-  if (this.checked) {
-    pTempMin.hidden = false;
-  } else {
-    pTempMin.hidden = true;
-  }
-});
-
-checkTempActuel.addEventListener('change', function() {
-  if (this.checked) {
-    tempActuel.hidden = false;
-  } else {
-    tempActuel.hidden = true;
-  }
-});
+        
+}
 
 
 //affichage de la température en fonction de l'heure future choisis par l'utilisateur 
-//e de l’évolution du temps dans les prochaines heures
-const pTempHeure = document.createElement('p');
 let p_t = document.createElement('p');
-all_d = document.querySelectorAll('div');
-all_d[1].appendChild(p_t);
+divTab = document.querySelectorAll('div');
+divTab[1].appendChild(p_t);
 function getHeure(){
   var cHeure = document.getElementById("choixHeure").value;
   if(cHeure > heure && heure < 24){ //vérification que l'heure demandé par l'utilisateur est une heure future
-    p_t.textContent = "Il fera " + rep.hourly.temperature_2m[cHeure] +"°C";
-    //newDiv.appendChild(pTempHeure);
+    p_t.textContent = "La température a  "+cHeure +"h sera de "  + rep.hourly.temperature_2m[cHeure] +"°C";
   }else {
-    alert('Vous devez mettre une heure future (heure mise : '+ cHeure + ")")
+    p_t.textContent = "Vous avez besoin de demander une heure future et inferieur ou egale a 23h"
   }
 }
-all_d[1].appendChild(p_t); // ajout de l'affichage de la température en dessous du bouton div en dessous de la Météo à Blois
-const courbeTemp = document.getElementById('tempFuture');
-// marche pas
 
+
+const courbeTemp = document.getElementById('tempFuture');
 new Chart(courbeTemp, {// sert a afficher un graphique avec les température de la journée
   type: 'line', 
   data:{
@@ -111,35 +78,28 @@ new Chart(courbeTemp, {// sert a afficher un graphique avec les température de 
       label: 'température',
       data: Object.values(rep.hourly.temperature_2m),
     }],
-
-  
     },
 });
 
 
+
 //etape 3
 
-
-var divTab = document.querySelectorAll("div");
-
-//Météo de la journée 
+//Variables pour afficher la météo journalieres d'un lieu
 const meteoDaily = document.createElement('p');
-
 const pluieDaily = document.createElement('p');
 const neigeDaily = document.createElement('p');
 const PrecipitationDaily= document.createElement('p');
 const temperatureDaily = document.createElement('p');
 
-
+//Variables pour afficher la liste des lieux
 const lieuAjouté = document.createElement('p');
 const list_lieux = document.createElement('p');
-//jsp comment faire avec un dictionnaire, pour l'instant j'utilise 3 tableaux, 1 lieux, 1 coordX, 1 coordY, chaque indice = 1 lieu  indice 0 de chaque tableau = lieu[0] coordX[0] etc
-// tableaux pour conserver les lieux utilisés / compatibilité avec le code existant.
-// lieux : noms des endroits
-// coordX = longitude, coordY = latitude
-const lieux = [];
-const coordX = []; //longitude
-const coordY = []; //latitude
+
+
+const lieux = []; // noms des endroits
+const coordX = []; //longitude coordX
+const coordY = []; //latitude coordY
 
 
 function notEmpty(string){ // verifie si un string n'est pas vide
@@ -159,18 +119,20 @@ function validNumber(nombre){ // verifie si un string est un nombre
   }
   
 }
+function validRequest(){ //vérifie que ca va pas faire planter l'appel api
+  if(notEmpty(longitude) && notEmpty(latitude) && validNumber(latitude) && validNumber(longitude)){
+    return true;
+  }else{
+    return false;
+  }
+}
 
-//var dict_lieu = new Map();// défini pour afficher si le lieu est ajouté ou non et pour avoir acces a la liste plus tard
-
-function getMeteoActuel(){ //fonction qui affiche la meteoActuel(daily)
+function getMeteoActuel(){ //fonction qui affiche la Metéo journalière (daily)
 
   var longitude = document.getElementById("longitude").value;
   var latitude = document.getElementById("latitude").value;
   var lieu = document.getElementById("place").value;
-  console.log(longitude);
-  console.log(latitude);
-
-  if(notEmpty(longitude) && notEmpty(latitude) && validNumber(latitude) && validNumber(longitude)){ //vérifie que ca va pas faire planter l'appel api
+  if(validRequest){ 
     repMP = response("https://api.open-meteo.com/v1/forecast?latitude="+latitude+"&longitude="+longitude+"&daily=weather_code,rain_sum,snowfall_sum,precipitation_sum,wind_speed_10m_max&hourly=temperature_2m,cloud_cover,rain,snowfall&models=meteofrance_seamless&current=temperature_2m,rain,snowfall,precipitation,cloud_cover,wind_speed_10m");
 
     var dRain = repMP.current.rain;
@@ -211,10 +173,6 @@ function getMeteoActuel(){ //fonction qui affiche la meteoActuel(daily)
 
 }
 
-// afficher la liste des lieu via un boutton
-
-// liason à la liste sauvegardée
-function getLieu(){renderSavedLocationList();}
 
 // liste des lieux stockée dans localStorage (avec nom, latitude et longitude)
 let savedLocations = [];
@@ -472,6 +430,7 @@ document.body.appendChild(d);
 const t = document.createElement('h1');
 t.innerText = "Prévision météo & temps";
 d.appendChild(t);
+
 // ---------------------------------------------------------------------------------------
 // api partie 2
 //const rep2 = response(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_mean,precipitation_probability_mean&hourly=temperature_2m,precipitation_probability,precipitation&timezone=auto`);
