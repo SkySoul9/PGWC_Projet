@@ -5,11 +5,12 @@
 // Conteneur ajouté dynamiquement pour les résultats principaux du projet
 // (utilisé pour les informations globales de Blois et les infos horaires).
 const newDiv = document.createElement('div');
-document.body.appendChild(newDiv);
+//document.body.appendChild(newDiv);
 
 const newTitle = document.createElement('h1');
-newTitle.textContent = "Météo test1";
-newDiv.appendChild(newTitle);
+newTitle.textContent = "Températures";
+//newDiv.appendChild(newTitle);
+document.querySelectorAll("div")[0].appendChild(newTitle);
 
 
 // fonction appelle a l'api
@@ -31,13 +32,15 @@ rep = response("https://api.open-meteo.com/v1/forecast?latitude=47.5943&longitud
 const pTempMin = document.createElement('p');
 pTempMin.textContent = "Température Min journée à Blois : " + rep.daily.temperature_2m_min + rep.daily_units.temperature_2m_min;
 pTempMin.hidden = true;
-newDiv.appendChild(pTempMin);
+//newDiv.appendChild(pTempMin);
+document.querySelectorAll("div")[0].appendChild(pTempMin);
 
 //Température Max de la journée 
 const pTempMax = document.createElement('p');
 pTempMax.textContent = "Temperature Max journée à Blois : " + rep.daily.temperature_2m_max + rep.daily_units.temperature_2m_max;
 pTempMax.hidden = true;
-newDiv.appendChild(pTempMax);
+//newDiv.appendChild(pTempMax);
+document.querySelectorAll("div")[0].appendChild(pTempMax);
 
 
 //Température a l'heure actuel
@@ -48,8 +51,8 @@ let heure = date.getHours();//récupere l'heure du PC pour l'utiliser pour tempA
 const tempActuel = document.createElement('p');
 tempActuel.textContent = "Temperature Actuel : " + rep.hourly.temperature_2m[heure] + rep.hourly_units.temperature_2m;
 tempActuel.hidden = true;
-newDiv.appendChild(tempActuel);
-
+//newDiv.appendChild(tempActuel);
+document.querySelectorAll("div")[0].appendChild(tempActuel);
 
 //gestion affichage temperature max/min/actuel exo1
 var checkTempMax = document.querySelector("input[id=cbTempMax]");
@@ -84,16 +87,19 @@ checkTempActuel.addEventListener('change', function() {
 //affichage de la température en fonction de l'heure future choisis par l'utilisateur 
 //e de l’évolution du temps dans les prochaines heures
 const pTempHeure = document.createElement('p');
- 
+let p_t = document.createElement('p');
+all_d = document.querySelectorAll('div');
+all_d[1].appendChild(p_t);
 function getHeure(){
   var cHeure = document.getElementById("choixHeure").value;
   if(cHeure > heure && heure < 24){ //vérification que l'heure demandé par l'utilisateur est une heure future
-    pTempHeure.textContent = rep.hourly.temperature_2m[cHeure];
-    newDiv.appendChild(pTempHeure);
+    p_t.textContent = "Il fera " + rep.hourly.temperature_2m[cHeure] +"°C";
+    //newDiv.appendChild(pTempHeure);
   }else {
     alert('Vous devez mettre une heure future (heure mise : '+ cHeure + ")")
   }
 }
+all_d[1].appendChild(p_t); // ajout de l'affichage de la température en dessous du bouton div en dessous de la Météo à Blois
 const courbeTemp = document.getElementById('tempFuture');
 // marche pas
 
@@ -315,6 +321,7 @@ function getWeatherForLocation(latitude, longitude, name)
   try
   {
     const repL = response(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m&current_weather=true&timezone=auto&forecast_days=1`);
+          rep = response("https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=temperature_2m_mean,precipitation_probability_mean&hourly=temperature_2m,precipitation_probability,precipitation&timezone=auto");
 
     let current = repL.current_weather?.temperature ?? 'Inconnu';
     let sup = repL.daily?.temperature_2m_min?.[0] ?? '-';
@@ -455,3 +462,150 @@ loadSavedLocations();
 
 //api link température a 4j
 // https://api.open-meteo.com/v1/forecast?latitude=47.5943&longitude=1.3291&daily=temperature_2m_max,temperature_2m_min&hourly=temperature_2m,is_day&models=best_match&timezone=auto
+//console.log(savedLocations);
+
+// Partie 2
+
+// création division -> partie affichage prévision et graphique pour les jours à venir
+const d = document.createElement('div');
+document.body.appendChild(d);
+const t = document.createElement('h1');
+t.innerText = "Prévision météo & temps";
+d.appendChild(t);
+// ---------------------------------------------------------------------------------------
+// api partie 2
+//const rep2 = response(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_mean,precipitation_probability_mean&hourly=temperature_2m,precipitation_probability,precipitation&timezone=auto`);
+rep2 = response("https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=temperature_2m_mean,precipitation_probability_mean&hourly=temperature_2m,precipitation_probability,precipitation&timezone=auto");
+
+
+day_prec = rep2.daily.precipitation_probability_mean;
+day = rep2.daily.time;
+temp = rep2.daily.temperature_2m_mean;
+
+// création d'un menu de sélection + option
+select = document.createElement('select');
+option = document.createElement('option');
+last_div = document.querySelectorAll('div')[8];
+//console.log(last_div)
+last_div.appendChild(select);
+
+select.appendChild(option);
+option.textContent = "date de prévision";
+
+// création d'un bouton de submit
+let p = document.createElement('p');
+last_div.appendChild(p);
+
+precipitation_today = day_prec[0];
+today = rep2.daily.time[0];
+temp_today = rep2.daily.temperature_2m_mean[0];
+
+// options de sélection des dates
+
+for(i = 1; i < 7; i++){
+    //let k = i - 1;
+    // initialisation des paramètres d'aujourd'hui
+    option2 = document.createElement('option');
+    select.appendChild(option2);
+    choix = document.querySelectorAll('option');
+    option2.textContent = day[i];
+    
+    // visualisation des choix
+    //console.log(choix[2]);
+   
+    }
+
+ function choix_date(date){
+        for(let k = 1; k < day_prec.length; k++){
+            if(date == day[k]){
+                if(day_prec[k] > day_prec[k-1]){//precipitation_today sur toutes les conditions if){
+                    // cas ou le niveau de % de précipitation est plus élevé
+                    p.textContent = "Le temps a une probabilité plus élevée de +" +(day_prec[k] - day_prec[k-1]) +"% de se dégrader à ce jour : " + date + " par rapport au jour d'avant :" + day[k-1];
+                    //break;
+
+                }
+                if(day_prec[k] == day_prec[k-1]){
+                    p.textContent = "Le temps a une probabilité similaire de se dégrader à ce jour : " + date + " par rapport au jour d'avant :" + day[k-1];
+                    //break;
+            }
+
+                if(day_prec[k] < day_prec[k-1]){
+                    p.textContent = "Le temps a une probabilité plus réduite de " +(day_prec[k] - day_prec[k-1]) +"% de se dégrader à ce jour : " + date + " par rapport au jour d'avant :" + day[k-1];
+                    //break;
+                }
+                break;
+            }
+    
+    }
+}
+const c = document.createElement("canvas");
+c.setAttribute("id","Temp");
+c.setAttribute("style", "display: flex; box-sizing: border-box; height: 375px; width: 750px;")
+last_div.appendChild(c);
+let g;
+// ------------------------------------------------------------------------------------------------------------
+// fonctions dont on aura besoin pour la fonction suivante
+time = rep2.hourly.time;
+temp_h = rep2.hourly.temperature_2m;
+let hour_p = []; // tab pour les heures
+let temp_p = []; // tab pour pour les températures
+//console.log(time);
+function getHourDay(j, h){ // obtient le jour avec l'heure
+    return time[(24*(j - 1))+ h]
+}
+
+function getTemp(j, h){
+    return temp_h[(24*(j - 1))+ h]
+}
+// -------------------------------------------------------------------------------------------------------------
+// créer une fonction qui prendra une date et renverra ses température (hourly.temperature_2m) par rapport aux heures (hourly.time)
+function time_temp(date){
+  
+    for(i = 0; i < 24; i++){
+      for(k = 1; k < day.length; k++){
+        if (date == day[k]){
+          //if(time.includes(date)){
+            //k+=1;
+          //}
+          hour_p.push(getHourDay(k+1,i)); //on ajoute dans le tableau les données des dates 
+          temp_p.push(getTemp(k+1,i));
+        }}}
+        // création du canvas
+    g = new Chart(c,
+          {
+            type: "line", // graphique linéaire
+            data : {
+              labels: Object.values(hour_p),//day), // affichage des jours graphique en x
+              datasets: [{
+                label: 'Température moyenne/jour',
+                data: Object.values(temp_p), // affichage températures graphique en y
+              }],
+            },
+            options: {
+            responsive: true}
+          }
+        );
+} 
+let reset = document.createElement('button');
+reset.innerText = "actualiser";
+last_div.appendChild(reset);
+//reset.onclick = g.destroy();
+//const graphique = document.getElementById("Temp");
+    select.addEventListener("change",(event) =>{
+        //console.log(event.target.value);
+        console.log(choix_date(event.target.value)); // on récupère le choix fait dans le menu avec (event.target.value)
+        time_temp(event.target.value);
+        if(event.target.value == option.textContent){
+          p.textContent = ""; // cas où l'on rechoisit date de prévision, on n'affichera rien
+          //Chart.id.
+        }
+        reset.addEventListener("click",()=>{
+          reset = g.destroy();
+          reset;
+          //time_temp(event.target.value);
+          //g.update();
+          //g.datasets
+});
+});
+
+console.log(getHourDay(2,18), getTemp(2,18));
