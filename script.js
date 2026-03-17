@@ -1,10 +1,21 @@
+//questions : es-ce qu'il faut afficher pour la journée les heures futures genre toute la journée ca passe ou précisement le temps apres l'heure actuel et la temperature seule suffit ?
+//es-ce que c'est important de gerer avec un dico ou non le stockage des lieux ou si on utilise des tableaux ca passe 
+// boucle pour cacher les elements, comment faire 
+
+// Conteneur ajouté dynamiquement pour les résultats principaux du projet
+// (utilisé pour les informations globales de Blois et les infos horaires).
 const newDiv = document.createElement('div');
 //document.body.appendChild(newDiv);
+
+const newTitle = document.createElement('h1');
+newTitle.textContent = "Températures";
+//newDiv.appendChild(newTitle);
+document.querySelectorAll("div")[0].appendChild(newTitle);
 
 
 // fonction appelle a l'api
 // param query : URL de requête Open-Meteo ou Nominatim
-// renvoie l'objet JSON parsé 
+// renvoie l'objet JSON parsé (synchrone pour simplicité, mais en production préférer fetch/async)
 function response(query){
     const xhr = new XMLHttpRequest();
     xhr.open("GET", query, false); 
@@ -17,59 +28,81 @@ function response(query){
 // temperature link a 1j (donnée de base pour affichage initial de Blois)
 rep = response("https://api.open-meteo.com/v1/forecast?latitude=47.5943&longitude=1.3291&daily=temperature_2m_max,temperature_2m_min&hourly=temperature_2m,weather_code,relative_humidity_2m,apparent_temperature,is_day&models=best_match&timezone=auto&forecast_days=1");
 
-
-var divTab = document.querySelectorAll("div");
 //température Min de la jouréne 
 const pTempMin = document.createElement('p');
 pTempMin.textContent = "Température Min journée à Blois : " + rep.daily.temperature_2m_min + rep.daily_units.temperature_2m_min;
-pTempMin.id= "temperature";
 pTempMin.hidden = true;
-
+//newDiv.appendChild(pTempMin);
 document.querySelectorAll("div")[0].appendChild(pTempMin);
 
 //Température Max de la journée 
 const pTempMax = document.createElement('p');
 pTempMax.textContent = "Temperature Max journée à Blois : " + rep.daily.temperature_2m_max + rep.daily_units.temperature_2m_max;
-pTempMax.id= "temperature";
 pTempMax.hidden = true;
+//newDiv.appendChild(pTempMax);
 document.querySelectorAll("div")[0].appendChild(pTempMax);
 
+
 //Température a l'heure actuel
+
 let date = new Date;
 let heure = date.getHours();//récupere l'heure du PC pour l'utiliser pour tempActuel
+
 const tempActuel = document.createElement('p');
 tempActuel.textContent = "Temperature Actuel : " + rep.hourly.temperature_2m[heure] + rep.hourly_units.temperature_2m;
-tempActuel.id= "temperature";
 tempActuel.hidden = true;
+//newDiv.appendChild(tempActuel);
 document.querySelectorAll("div")[0].appendChild(tempActuel);
 
 //gestion affichage temperature max/min/actuel exo1
-function coche(x) {
-  cblist = document.querySelectorAll("p[id=temperature]");
-  if(cblist[x].hidden){
-    cblist[x].hidden = false;
+var checkTempMax = document.querySelector("input[id=cbTempMax]");
+var checkTempMin = document.querySelector("input[id=cbTempMin]");
+var checkTempActuel = document.querySelector("input[id=cbTempActuel]");
+
+checkTempMax.addEventListener('change', function() {
+  if (this.checked) {
+    pTempMax.hidden = false;
   } else {
-    cblist[x].hidden = true
+    pTempMax.hidden = true;
   }
-        
-}
+});
+
+checkTempMin.addEventListener('change', function() {
+  if (this.checked) {
+    pTempMin.hidden = false;
+  } else {
+    pTempMin.hidden = true;
+  }
+});
+
+checkTempActuel.addEventListener('change', function() {
+  if (this.checked) {
+    tempActuel.hidden = false;
+  } else {
+    tempActuel.hidden = true;
+  }
+});
 
 
 //affichage de la température en fonction de l'heure future choisis par l'utilisateur 
+//e de l’évolution du temps dans les prochaines heures
+const pTempHeure = document.createElement('p');
 let p_t = document.createElement('p');
-divTab = document.querySelectorAll('div');
-divTab[1].appendChild(p_t);
+all_d = document.querySelectorAll('div');
+all_d[1].appendChild(p_t);
 function getHeure(){
   var cHeure = document.getElementById("choixHeure").value;
   if(cHeure > heure && heure < 24){ //vérification que l'heure demandé par l'utilisateur est une heure future
-    p_t.textContent = "La température a  "+cHeure +"h sera de "  + rep.hourly.temperature_2m[cHeure] +"°C";
+    p_t.textContent = "Il fera " + rep.hourly.temperature_2m[cHeure] +"°C";
+    //newDiv.appendChild(pTempHeure);
   }else {
-    p_t.textContent = "Vous avez besoin de demander une heure future et inferieur ou egale a 23h"
+    alert('Vous devez mettre une heure future (heure mise : '+ cHeure + ")")
   }
 }
-
-
+all_d[1].appendChild(p_t); // ajout de l'affichage de la température en dessous du bouton div en dessous de la Météo à Blois
 const courbeTemp = document.getElementById('tempFuture');
+// marche pas
+
 new Chart(courbeTemp, {// sert a afficher un graphique avec les température de la journée
   type: 'line', 
   data:{
@@ -78,28 +111,35 @@ new Chart(courbeTemp, {// sert a afficher un graphique avec les température de 
       label: 'température',
       data: Object.values(rep.hourly.temperature_2m),
     }],
+
+  
     },
 });
 
 
-
 //etape 3
 
-//Variables pour afficher la météo journalieres d'un lieu
+
+var divTab = document.querySelectorAll("div");
+
+//Météo de la journée 
 const meteoDaily = document.createElement('p');
+
 const pluieDaily = document.createElement('p');
 const neigeDaily = document.createElement('p');
 const PrecipitationDaily= document.createElement('p');
 const temperatureDaily = document.createElement('p');
 
-//Variables pour afficher la liste des lieux
+
 const lieuAjouté = document.createElement('p');
 const list_lieux = document.createElement('p');
-
-
-const lieux = []; // noms des endroits
-const coordX = []; //longitude coordX
-const coordY = []; //latitude coordY
+//jsp comment faire avec un dictionnaire, pour l'instant j'utilise 3 tableaux, 1 lieux, 1 coordX, 1 coordY, chaque indice = 1 lieu  indice 0 de chaque tableau = lieu[0] coordX[0] etc
+// tableaux pour conserver les lieux utilisés / compatibilité avec le code existant.
+// lieux : noms des endroits
+// coordX = longitude, coordY = latitude
+const lieux = [];
+const coordX = []; //longitude
+const coordY = []; //latitude
 
 
 function notEmpty(string){ // verifie si un string n'est pas vide
@@ -119,22 +159,19 @@ function validNumber(nombre){ // verifie si un string est un nombre
   }
   
 }
-function validRequest(){ //vérifie que ca va pas faire planter l'appel api
-  if(notEmpty(longitude) && notEmpty(latitude) && validNumber(latitude) && validNumber(longitude)){
-    return true;
-  }else{
-    return false;
-  }
-}
 
-function getMeteoActuel(){ //fonction qui affiche la Metéo journalière (daily)
+//var dict_lieu = new Map();// défini pour afficher si le lieu est ajouté ou non et pour avoir acces a la liste plus tard
+
+function getMeteoActuel(){ //fonction qui affiche la meteoActuel(daily)
 
   var longitude = document.getElementById("longitude").value;
   var latitude = document.getElementById("latitude").value;
   var lieu = document.getElementById("place").value;
-  if(validRequest){ 
-    repMP = response("https://api.open-meteo.com/v1/forecast?latitude="+latitude+"&longitude="+longitude+"&daily=weather_code,rain_sum,snowfall_sum,precipitation_sum,wind_speed_10m_max&hourly=temperature_2m,cloud_cover,rain,snowfall&models=meteofrance_seamless&current=temperature_2m,rain,snowfall,precipitation,cloud_cover,wind_speed_10m");
+  console.log(longitude);
+  console.log(latitude);
 
+  if(notEmpty(longitude) && notEmpty(latitude) && validNumber(latitude) && validNumber(longitude)){ //vérifie que ca va pas faire planter l'appel api
+    repMP = response("https://api.open-meteo.com/v1/forecast?latitude="+latitude+"&longitude="+longitude+"&daily=weather_code,rain_sum,snowfall_sum,precipitation_sum,wind_speed_10m_max&hourly=temperature_2m,cloud_cover,rain,snowfall&models=meteofrance_seamless&current=temperature_2m,rain,snowfall,precipitation,cloud_cover,wind_speed_10m");
     var dRain = repMP.current.rain;
     var dNeige = repMP.current.snowfall;
     var dPrecipitation = repMP.current.precipitation;
@@ -173,6 +210,10 @@ function getMeteoActuel(){ //fonction qui affiche la Metéo journalière (daily)
 
 }
 
+// afficher la liste des lieu via un boutton
+
+// liason à la liste sauvegardée
+function getLieu(){renderSavedLocationList();}
 
 // liste des lieux stockée dans localStorage (avec nom, latitude et longitude)
 let savedLocations = [];
@@ -279,7 +320,7 @@ function getWeatherForLocation(latitude, longitude, name)
   try
   {
     const repL = response(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m&current_weather=true&timezone=auto&forecast_days=1`);
-          rep = response("https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=temperature_2m_mean,precipitation_probability_mean&hourly=temperature_2m,precipitation_probability,precipitation&timezone=auto");
+          
 
     let current = repL.current_weather?.temperature ?? 'Inconnu';
     let sup = repL.daily?.temperature_2m_min?.[0] ?? '-';
@@ -433,33 +474,87 @@ d.appendChild(t);
 
 // ---------------------------------------------------------------------------------------
 // api partie 2
+// variables locs
 //const rep2 = response(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_mean,precipitation_probability_mean&hourly=temperature_2m,precipitation_probability,precipitation&timezone=auto`);
-rep2 = response("https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=temperature_2m_mean,precipitation_probability_mean&hourly=temperature_2m,precipitation_probability,precipitation&timezone=auto");
+let url = "https://api.open-meteo.com/v1/forecast?latitude=15.56&longitude=11.5&daily=temperature_2m_mean,precipitation_probability_mean&hourly=temperature_2m,precipitation_probability,precipitation&timezone=auto";
 
 
-day_prec = rep2.daily.precipitation_probability_mean;
-day = rep2.daily.time;
-temp = rep2.daily.temperature_2m_mean;
+// création des éléments de la dernière div ----------------------------------------------------------
+let long = document.createElement('input');
+long.setAttribute("type","text");
+long.setAttribute("id","longitude2");
+long.setAttribute("placeholder", "longitude");
 
-// création d'un menu de sélection + option
+let lat = document.createElement('input');
+lat.setAttribute("type","text");
+lat.setAttribute("id","latitude2");
+lat.setAttribute("placeholder", "latitude");
+
 select = document.createElement('select');
 option = document.createElement('option');
+let para = document.createElement('p'); // affichage des locs et de la zone pour la partie d'après
+let b_loc = document.createElement('button');
 last_div = document.querySelectorAll('div')[8];
+// on récupère les éléments des champs de textes ------------------------------------------------
+
+
+
+
+b_loc.textContent = "Stocker latitude/longitude";
+
+
+
+rep2 = response(url);
+//rep2 = response("https://api.open-meteo.com/v1/forecast?latitude="+latitude+"&longitude="+longitude+"&daily=temperature_2m_mean,precipitation_probability_mean&hourly=temperature_2m,precipitation_probability,precipitation&timezone=auto");
+// fonction qui va renvoyer la localisation via la longitude et la latitude
+  
+
+//last_div.appendChild(para);
+
+//r = response("https://api.open-meteo.com/v1/forecast?latitude=15.5&longitude=12.5&daily=temperature_2m_mean,precipitation_probability_mean&hourly=temperature_2m,precipitation_probability,precipitation&timezone=auto");
+
+
+
+
+// création d'un menu de sélection + option
+
+
 //console.log(last_div)
+last_div.appendChild(long);
+last_div.appendChild(lat);
 last_div.appendChild(select);
+last_div.appendChild(b_loc);
+
 
 select.appendChild(option);
 option.textContent = "date de prévision";
+//-------------------------------------------------------------------------------------
+// ajout fonction coord longitude et latitude
 
+
+
+
+
+
+// on les ajoute 
+
+
+//-------------------------------------------------------------------------------------
 // création d'un bouton de submit
 let p = document.createElement('p');
 last_div.appendChild(p);
 
-precipitation_today = day_prec[0];
+
+
+
+// initialisation des var ici
+day_prec = rep2.daily.precipitation_probability_mean;
+day = rep2.daily.time;
+temp = rep2.daily.temperature_2m_mean;
+
+let precipitation_today = day_prec[0];
 today = rep2.daily.time[0];
 temp_today = rep2.daily.temperature_2m_mean[0];
-
-// options de sélection des dates
 
 for(i = 1; i < 7; i++){
     //let k = i - 1;
@@ -474,7 +569,7 @@ for(i = 1; i < 7; i++){
    
     }
 
- function choix_date(date){
+ function choix_date(date){ //fonction
         for(let k = 1; k < day_prec.length; k++){
             if(date == day[k]){
                 if(day_prec[k] > day_prec[k-1]){//precipitation_today sur toutes les conditions if){
@@ -497,15 +592,31 @@ for(i = 1; i < 7; i++){
     
     }
 }
+
+// création du canvas
 const c = document.createElement("canvas");
 c.setAttribute("id","Temp");
 c.setAttribute("style", "display: flex; box-sizing: border-box; height: 375px; width: 750px;")
 last_div.appendChild(c);
-let g;
+
+let g = new Chart(c,
+          {
+            type: "line", // graphique linéaire
+            data : {
+              labels: null, //Object.values(hour_p),//day), // affichage des jours graphique en x
+              datasets: [{
+                label: 'Température moyenne jours à venir',
+                data: null//Object.values(), // affichage températures graphique en y
+              }],
+            },
+            options: {
+            responsive: true}
+          }
+        );
 // ------------------------------------------------------------------------------------------------------------
 // fonctions dont on aura besoin pour la fonction suivante
-time = rep2.hourly.time;
-temp_h = rep2.hourly.temperature_2m;
+let time = rep2.hourly.time;
+let temp_h = rep2.hourly.temperature_2m;
 let hour_p = []; // tab pour les heures
 let temp_p = []; // tab pour pour les températures
 //console.log(time);
@@ -518,7 +629,7 @@ function getTemp(j, h){
 }
 // -------------------------------------------------------------------------------------------------------------
 // créer une fonction qui prendra une date et renverra ses température (hourly.temperature_2m) par rapport aux heures (hourly.time)
-function time_temp(date){
+function time_temp(date){ // affiche les températures et les dates dans le Chart graphique
   
     for(i = 0; i < 24; i++){
       for(k = 1; k < day.length; k++){
@@ -529,42 +640,78 @@ function time_temp(date){
           hour_p.push(getHourDay(k+1,i)); //on ajoute dans le tableau les données des dates 
           temp_p.push(getTemp(k+1,i));
         }}}
-        // création du canvas
-    g = new Chart(c,
-          {
-            type: "line", // graphique linéaire
-            data : {
-              labels: Object.values(hour_p),//day), // affichage des jours graphique en x
-              datasets: [{
-                label: 'Température moyenne/jour',
-                data: Object.values(temp_p), // affichage températures graphique en y
-              }],
-            },
-            options: {
-            responsive: true}
-          }
-        );
-} 
+    g.data.labels = Object.values(hour_p);
+    g.data.datasets[0].data = Object.values(temp_p);
+    g.update();
+}; 
+
+// mise en place d'un bouton actualiser
 let reset = document.createElement('button');
 reset.innerText = "actualiser";
 last_div.appendChild(reset);
-//reset.onclick = g.destroy();
-//const graphique = document.getElementById("Temp");
+last_div.appendChild(para);
+// ------------------------------------------------------------------------------------------------------------------
+
+function loc_prévisions(){
+  var get_lat = document.getElementById('latitude2');
+  var get_long = document.getElementById('longitude2');
+  let p1 = document.createElement('p');
+  last_div.appendChild(p1);
+  let la, lo; // latitude/longitude
+  //if(get_lat.value != null && get_long.value != null){
+  la = get_lat.value;
+  lo = get_long.value;
+    //  tab_loc = [{"latitude": get_lat, "longitude": get_long}]; 
+  //}
+  //try{
+
+  //}
+  //catch(e){
+    //console.error("Erreur lors de l'apel API : ", e);
+  //}
+  let res2 = response("https://api.open-meteo.com/v1/forecast?latitude="+la+"&longitude="+lo+"&daily=temperature_2m_mean,precipitation_probability_mean&hourly=temperature_2m,precipitation_probability,precipitation&timezone=auto");
+  p1.textContent = "latitude : " + res2.latitude + " longitude : " + res2.longitude + " à " + res2.timezone;
+  // ---------------------------------------------------------------------------------------------------------------
+  day_prec = res2.daily.precipitation_probability_mean;
+  day = res2.daily.time;
+  temp = res2.daily.temperature_2m_mean;
+  time = res2.hourly.time;
+  temp_h = res2.hourly.temperature_2m;
+  // Sélection de date
     select.addEventListener("change",(event) =>{
         //console.log(event.target.value);
         console.log(choix_date(event.target.value)); // on récupère le choix fait dans le menu avec (event.target.value)
         time_temp(event.target.value);
+        //para.innerText = "Météo pour la zone "+res.timezone+" en Latitude: " + res.Latitude + ", Longitude: " + res.Longitude; // affichage des coordonées
         if(event.target.value == option.textContent){
           p.textContent = ""; // cas où l'on rechoisit date de prévision, on n'affichera rien
           //Chart.id.
         }
-        reset.addEventListener("click",()=>{
-          reset = g.destroy();
-          reset;
-          //time_temp(event.target.value);
-          //g.update();
-          //g.datasets
-});
 });
 
-console.log(getHourDay(2,18), getTemp(2,18));
+// --------------------------------------------------------------------------------------
+reset.addEventListener("click",()=>{
+          //if(g.destroy()){ ne pas supprimer
+          if(g != null){
+            //g.destroy();
+            g.data.labels.splice(0,g.data.labels.length); // on réinitialise les données après l'appuit sur le bouton actualiser
+            g.data.datasets[0].data = [];
+            p.textContent = ""; // cas où l'on rechoisit date de prévision, on n'affichera rien
+            g.update();
+    }});
+
+// ---------------------------------------------------------------------------------------
+
+}
+b_loc.addEventListener("click",()=>{
+    loc_prévisions();
+      
+});
+
+// partie bouton reset 
+
+
+
+// -------------------------------------------------
+
+// partie bouton affichage coordonnées
