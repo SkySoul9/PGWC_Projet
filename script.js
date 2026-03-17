@@ -643,6 +643,7 @@ function time_temp(date){ // affiche les températures et les dates dans le Char
     g.data.labels = Object.values(hour_p);
     g.data.datasets[0].data = Object.values(temp_p);
     g.update();
+    
 }; 
 
 // mise en place d'un bouton actualiser
@@ -661,14 +662,6 @@ function loc_prévisions(){
   //if(get_lat.value != null && get_long.value != null){
   la = get_lat.value;
   lo = get_long.value;
-    //  tab_loc = [{"latitude": get_lat, "longitude": get_long}]; 
-  //}
-  //try{
-
-  //}
-  //catch(e){
-    //console.error("Erreur lors de l'apel API : ", e);
-  //}
   let res2 = response("https://api.open-meteo.com/v1/forecast?latitude="+la+"&longitude="+lo+"&daily=temperature_2m_mean,precipitation_probability_mean&hourly=temperature_2m,precipitation_probability,precipitation&timezone=auto");
   p1.textContent = "latitude : " + res2.latitude + " longitude : " + res2.longitude + " à " + res2.timezone;
   // ---------------------------------------------------------------------------------------------------------------
@@ -703,15 +696,11 @@ reset.addEventListener("click",()=>{
 // ---------------------------------------------------------------------------------------
 
 }
+
+// bouton d'affichage des loc et de la météo en façon des loc lat/long
 b_loc.addEventListener("click",()=>{
     loc_prévisions();
       
 });
 
-// partie bouton reset 
 
-
-
-// -------------------------------------------------
-
-// partie bouton affichage coordonnées
